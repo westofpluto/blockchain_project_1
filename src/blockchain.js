@@ -127,7 +127,13 @@ class Blockchain {
                 reject(new Error('Message failed to verify'));
             } else {
                 var block = new BlockClass.Block({owner: address, star: star});
-                resolve(await self._addBlock(block));
+                let newBlock = await self._addBlock(block);
+                let errLog=await self.validateChain();
+                if (errLog.length !== 0) {
+                    reject(new Error('Chain is not validated! There were one or more invalid blocks'));
+                } else { 
+                    resolve(newBlock);
+                }
             }
         });
     }
@@ -198,7 +204,7 @@ class Blockchain {
                             let strData = JSON.stringify(blockData)
 
                             if (blockData.owner === address) {
-                                stars.push(blockData.star); 
+                                stars.push({owner: address, star: blockData.star}); 
                             }
                         } 
                     } catch(err) {
